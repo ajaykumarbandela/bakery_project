@@ -1,0 +1,183 @@
+{% extends 'bakery/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/orders.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- User Authentication Check -->
+{% if not user.is_authenticated %}
+<section id="login-required">
+    <div class="container">
+        <div class="login-prompt">
+            <i class="fas fa-lock"></i>
+            <h2>Login Required</h2>
+            <p>Please log in to view your orders and order history.</p>
+            <a href="{% url 'login' %}" class="btn btn-primary">Login Now</a>
+            <p style="margin-top: 15px;">
+                Don't have an account? <a href="{% url 'signup' %}">Sign up here</a>
+            </p>
+        </div>
+    </div>
+</section>
+{% else %}
+<!-- User is authenticated - show orders -->
+<section id="orders-header">
+    <div class="container">
+        <h1><i class="fas fa-receipt"></i> My Orders</h1>
+        <p>Welcome back, {{ user_full_name }}! Track your delicious bakery orders and order history</p>
+        {% if total_orders > 0 %}
+        <div class="order-stats">
+            <span><strong>Total Orders:</strong> {{ total_orders }}</span>
+            <span><strong>Delivered:</strong> {{ delivered_orders }}</span>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<section id="orders-content">
+    <div class="container">
+        <div class="orders-tabs">
+            <button class="tab-btn active" data-tab="current">
+                Current Orders 
+                {% if current_orders.count > 0 %}
+                <span class="badge">{{ current_orders.count }}</span>
+                {% endif %}
+            </button>
+            <button class="tab-btn" data-tab="history">
+                Order History
+                {% if order_history.count > 0 %}
+                <span class="badge">{{ order_history.count }}</span>
+                {% endif %}
+            </button>
+        </div>
+
+        <div class="tab-content active" id="current-orders">
+            <div id="current-orders-list">
+                {% if current_orders %}
+                    {% for order in current_orders %}
+                    <div class="order-card">
+                        <div class="order-header">
+                            <h3>Order #{{ order.order_id }}</h3>
+                            <span class="status status-{{ order.status }}">{{ order.get_status_display }}</span>
+                        </div>
+                        <div class="order-details">
+                            <div class="delivery-info">
+                                <strong>Delivery Address:</strong> {{ order.delivery_address|truncatechars:50 }}
+                                {% if order.delivery_phone %}
+                                <br><strong>Phone:</strong> {{ order.delivery_phone }}
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="order-items">
+                            {% for item in order.items.all %}
+                            <div class="order-item">
+                                <span>{{ item.quantity }}x {{ item.menu_item.name }}</span>
+                                <span>₹{{ item.subtotal }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="order-total">
+                            <div class="total-breakdown">
+                                <div>Subtotal: ₹{{ order.total_amount }}</div>
+                                <div>Delivery Fee: ₹{{ order.delivery_fee }}</div>
+                                <strong>Grand Total: ₹{{ order.grand_total }}</strong>
+                            </div>
+                        </div>
+                        <div class="order-footer">
+                            <small>Ordered on {{ order.created_at|date:"F j, Y g:i A" }}</small>
+                            {% if order.payment %}
+                            <small class="payment-status">
+                                Payment: <span class="payment-{{ order.payment.payment_status }}">{{ order.payment.get_payment_status_display }}</span>
+                            </small>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-shopping-bag"></i>
+                        <h3>No Current Orders</h3>
+                        <p>You don't have any ongoing orders at the moment.</p>
+                        <a href="{% url 'menu' %}" class="order-now-btn">Order Now</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="tab-content" id="order-history">
+            <div id="order-history-list">
+                {% if order_history %}
+                    {% for order in order_history %}
+                    <div class="order-card">
+                        <div class="order-header">
+                            <h3>Order #{{ order.order_id }}</h3>
+                            <span class="status status-{{ order.status }}">{{ order.get_status_display }}</span>
+                        </div>
+                        <div class="order-details">
+                            <div class="delivery-info">
+                                <strong>Delivered to:</strong> {{ order.delivery_address|truncatechars:50 }}
+                                {% if order.delivered_at %}
+                                <br><strong>Delivered on:</strong> {{ order.delivered_at|date:"F j, Y g:i A" }}
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="order-items">
+                            {% for item in order.items.all %}
+                            <div class="order-item">
+                                <span>{{ item.quantity }}x {{ item.menu_item.name }}</span>
+                                <span>₹{{ item.subtotal }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="order-total">
+                            <div class="total-breakdown">
+                                <div>Subtotal: ₹{{ order.total_amount }}</div>
+                                <div>Delivery Fee: ₹{{ order.delivery_fee }}</div>
+                                <strong>Grand Total: ₹{{ order.grand_total }}</strong>
+                            </div>
+                        </div>
+                        <div class="order-footer">
+                            <small>Ordered on {{ order.created_at|date:"F j, Y g:i A" }}</small>
+                            {% if order.payment %}
+                            <small class="payment-status">
+                                Payment: <span class="payment-{{ order.payment.payment_status }}">{{ order.payment.get_payment_status_display }}</span>
+                            </small>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-history"></i>
+                        <h3>No Order History</h3>
+                        <p>You haven't placed any orders yet. Start exploring our delicious menu!</p>
+                        <a href="{% url 'menu' %}" class="order-now-btn">Browse Menu</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const tab = this.dataset.tab;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            if (tab === 'current') {
+                document.getElementById('current-orders').classList.add('active');
+            } else {
+                document.getElementById('order-history').classList.add('active');
+            }
+        });
+    });
+</script>
+{% endblock %}

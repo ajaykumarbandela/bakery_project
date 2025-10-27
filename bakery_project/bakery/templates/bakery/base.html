@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TheBakeStory{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=2">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.css" integrity="sha512-kJlvECunwXftkPwyvHbclArO8wszgBGisiLeuDFwNM8ws+wKIw0sv1os3ClWZOcrEB2eRXULYUsm8OVRGJKwGA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <main>
+        <nav>
+            <aside id="nav1"><a href="{% url 'index' %}"><h1>The Bake Story</h1></a></aside>
+            <aside id="nav2">
+                <a href="{% url 'index' %}">Home</a>
+                <a href="{% url 'menu' %}">Menu</a>
+                <a href="{% url 'about' %}">About</a>
+                <a href="{% url 'contact' %}">Contact</a>
+                {% if user.is_authenticated %}
+                <a href="{% url 'orders' %}">Orders</a>
+                {% endif %}
+            </aside>
+            <aside id="nav3">
+               
+                <a href="{% url 'cart' %}">
+                    <i class="ri-shopping-cart-2-line"></i>
+                    <div id="quantity" class="quantity">0</div>
+                    <p id="cart_price">₹0.00</p>
+                </a>
+               {% comment %}  {% if user.is_authenticated %}
+                {% endif %} {% endcomment %}
+            </aside>
+            <h3>{{  user.first_name }} </h3>
+            <aside id="nav4">
+                {% if user.is_authenticated %}
+                    <span style="color: #d2691e; margin-right: 10px;"></span>
+                    <a href="{% url 'logout' %}"><i class="fa-solid fa-circle-user"></i></a>
+                {% else %}
+                    <a href="{% url 'login' %}"><i class="fa-solid fa-circle-user"></i></a>
+                {% endif %}
+            </aside>
+        </nav>
+    </main>
+     {% comment %}
+
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    {% endcomment %}
+
+    {% block content %}
+    {% endblock %}
+
+    <script>
+        const csrftoken = '{{ csrf_token }}';
+        const isAuthenticated = {{ user.is_authenticated | yesno:"true,false" }};
+        
+        function updateCartDisplay() {
+            console.log('=== BASE updateCartDisplay called ===');
+            
+            // Get cart from localStorage
+            let cart;
+            try {
+                cart = JSON.parse(localStorage.getItem('bakeryCart')) || {};
+            } catch (e) {
+                console.error('BASE - Error parsing cart from localStorage:', e);
+                cart = {};
+            }
+            
+            console.log('BASE - Current cart from localStorage:', cart);
+            
+            let totalQuantity = 0;
+            let totalPrice = 0;
+            
+            // Calculate totals from cart with error checking
+            Object.keys(cart).forEach(itemId => {
+                const item = cart[itemId];
+                if (item && typeof item === 'object') {
+                    const qty = parseInt(item.quantity) || 0;
+                    const price = parseFloat(item.price) || 0;
+                    totalQuantity += qty;
+                    totalPrice += price * qty;
+                    console.log(`BASE - Item ${itemId}: qty=${qty}, price=${price}, subtotal=${price * qty}`);
+                }
+            });
+            
+            console.log('BASE - Total quantity:', totalQuantity);
+            console.log('BASE - Total price:', totalPrice);
+            
+            // Update navbar display
+            const navQuantity = document.querySelector('#quantity') || 
+                              document.querySelector('.quantity') ||
+                              document.querySelector('#nav3 .quantity');
+            const cartPrice = document.querySelector('#cart_price') ||
+                             document.querySelector('#nav3 p');
+            
+            console.log('BASE - Found navQuantity element:', navQuantity);
+            console.log('BASE - Found cartPrice element:', cartPrice);
+            
+            if (navQuantity) {
+                navQuantity.textContent = totalQuantity.toString();
+                console.log('BASE - Updated quantity display to:', totalQuantity);
+            } else {
+                console.error('BASE - Could not find quantity element in navbar');
+            }
+            
+            if (cartPrice) {
+                cartPrice.textContent = `₹${totalPrice.toFixed(2)}`;
+                console.log('BASE - Updated price display to:', `₹${totalPrice.toFixed(2)}`);
+            } else {
+                console.error('BASE - Could not find price element in navbar');
+            }
+            
+            console.log('=== BASE updateCartDisplay completed ===');
+        }
+        
+        // Update cart display on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Base.html: DOM loaded, updating cart display');
+            updateCartDisplay();
+        });
+        
+        // Listen for storage changes (when cart is updated in another tab or by other scripts)
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'bakeryCart') {
+                console.log('Cart updated in storage, refreshing display');
+                updateCartDisplay();
+            }
+        });
+        
+        // Custom event for same-page cart updates
+        window.addEventListener('cartUpdated', function() {
+            console.log('Cart updated event received, refreshing display');
+            updateCartDisplay();
+        });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

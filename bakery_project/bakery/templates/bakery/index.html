@@ -1,0 +1,39 @@
+{% extends 'bakery/base.html' %}
+
+{% block content %}
+<header></header>
+<article>
+    <h1>The Best Bakery In Town</h1>
+    <p>we provide freshly baked items</p>
+    <a href="{% url 'menu' %}"><button>Order Now</button></a>
+</article>
+
+<section class="conti">
+    <h2>Enjoy Our delicious Bread</h2>
+    <article id="container">
+        <div>
+            <img class="a" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQJsxZCQC7FKVXsXFCw1n9tyZKV9pnasPpcJQ&s" alt="sourdough bread">
+            <p>sourdough bread</p>
+        </div>
+        <div>
+            <img class="a" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRgiqw1-Ee1hgrio3bJ44ki9eT91tgqHOzqLQ&s" alt="Croissant">
+            <p>Croissant</p>
+        </div>
+        <div>
+            <img class="a" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQCk81MUCJH0ENqwi8y7midIrNBW7O_hVp0yA&s" alt="Fruit Tart">
+            <p>Fruit Tart</p>
+        </div>
+        <div>
+            <img class="a" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwEuDw3mdCJyGJ3wM1uIngWezPpcPFYElNAg&s" alt="Chocolate Cake">
+            <p>Chocolate Cake</p>
+        </div>
+    </article>
+</section>
+
+<footer>
+    <h2>Visit Our Bakery</h2>
+    <p>Chaitanyapuri, Hyderabad</p>
+    <p>Open from 10:00 AM to 10:00 PM</p>
+    <a href="{% url 'contact' %}"><button>Contact Us</button></a>
+</footer>
+{% endblock %}

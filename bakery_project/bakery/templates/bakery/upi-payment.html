@@ -1,0 +1,526 @@
+{% extends 'bakery/base.html' %}
+
+{% block content %}
+ <style>
+        .upi-payment-container {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            height: 380vh;
+        }
+
+        .upi-payment-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            height: 360vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .payment-step {
+            margin-bottom: 30px;
+        }
+
+        .step-number {
+            background: #d2691e;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .qr-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            border: 2px dashed #d2691e;
+        }
+
+        .qr-placeholder {
+            width: 200px;
+            height: 200px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .upi-details {
+            background: #e8f5e8;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #28a745;
+        }
+
+        .upload-section {
+            margin: 30px 0;
+        }
+
+        .file-upload {
+            border: 2px dashed #d2691e;
+            border-radius: 15px;
+            padding: 40px 20px;
+            background: #fdf7f0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload:hover {
+            background: #f5e6d3;
+            border-color: #bf5a00;
+        }
+
+        .file-upload input[type="file"] {
+            display: none;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            color: #d2691e;
+            margin-bottom: 15px;
+        }
+
+        .file-preview {
+            max-width: 300px;
+            margin: 20px auto;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .file-preview img {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .place-order-btn {
+            background: linear-gradient(135deg, #d2691e 0%, #ff8c42 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            min-width: 200px;
+        }
+
+        .place-order-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(210, 105, 30, 0.3);
+        }
+
+        .place-order-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .order-summary-mini {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .order-summary-mini h4 {
+            color: #d2691e;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .summary-total {
+            border-top: 2px solid #d2691e;
+            padding-top: 10px;
+            font-weight: bold;
+            font-size: 18px;
+            color: #d2691e;
+        }
+
+        .instructions {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .instructions h4 {
+            color: #856404;
+            margin-bottom: 15px;
+        }
+
+        .instructions ol {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+            color: #856404;
+        }
+
+        /* Form Styles */
+        .delivery-form {
+            text-align: left;
+            margin: 20px 0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #d2691e;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #d2691e;
+        }
+
+        .form-group small {
+            display: block;
+            margin-top: 5px;
+            color: #666;
+            font-size: 12px;
+        }
+
+        .upload-section {
+            text-align: left;
+            margin: 20px 0;
+        }
+    </style>
+ <div class="upi-payment-container">
+        <div class="upi-payment-card">
+            <h2 style="color: #d2691e; margin-bottom: 30px;">
+                <i class="ri-smartphone-line"></i> UPI Payment
+            </h2>
+
+            <!-- Order Summary -->
+            <div class="order-summary-mini">
+                <h4><i class="ri-file-list-line"></i> Order Summary</h4>
+                <div id="orderItemsList"></div>
+                <div class="summary-row">
+                    <span>Subtotal:</span>
+                    <span id="summarySubtotal">₹0.00</span>
+                </div>
+                <div class="summary-row">
+                    <span>Delivery Fee:</span>
+                    <span>₹50.00</span>
+                </div>
+                <div class="summary-row summary-total">
+                    <span>Total Amount:</span>
+                    <span id="summaryTotal">₹0.00</span>
+                </div>
+            </div>
+
+            <!-- Step 1: Payment Instructions -->
+            <div class="payment-step">
+                <div class="step-number">1</div>
+                <h3 style="color: #d2691e;">Make Payment via UPI</h3>
+                
+                <div class="instructions">
+                    <h4><i class="ri-information-line"></i> Payment Instructions</h4>
+                    <ol>
+                        <li>Open your UPI app (Google Pay, PhonePe, Paytm, etc.)</li>
+                        <li>Scan the QR code below OR use the UPI ID</li>
+                        <li>Enter the exact amount shown</li>
+                        <li>Complete the payment</li>
+                        <li>Take a screenshot of the payment confirmation</li>
+                    </ol>
+                </div>
+
+                <div class="qr-section">
+                    <div class="qr-placeholder">
+                        <!-- Dynamic QR Code Generation -->
+                        <div id="qrcode-container">
+                            <img id="dynamic-qr" src="" alt="UPI QR Code" style="width: 200px; height: 200px; border-radius: 10px; display: none;">
+                        </div>
+                        <!-- Fallback placeholder -->
+                        <div id="qr-placeholder-fallback">
+                            <i class="ri-qr-code-line" style="font-size: 60px; color: #d2691e;"></i>
+                            <p>QR Code for Payment</p>
+                            <p style="font-size: 12px; color: #666;">Loading QR Code...</p>
+                        </div>
+                    </div>
+                    
+                    <div class="upi-details">
+                        <h4><i class="ri-smartphone-line"></i> UPI Payment Details</h4>
+                        <p><strong>UPI ID:</strong> <span id="upi-id">your-actual-upi-id@paytm</span></p>
+                        <p><strong>Amount:</strong> <span id="paymentAmount">₹0.00</span> <span id="convertedAmount" style="color: #666; font-size: 12px;"></span></p>
+                        <p><strong>Merchant:</strong> The Bake Story</p>
+                    </div>
+                    </div>
+                </div>
+            <!-- Step 2: Delivery Details & Upload Receipt -->
+            <form method="post" enctype="multipart/form-data" id="paymentForm">
+                {% csrf_token %}
+                <input type="hidden" name="cart_data" id="cart_data" value="">
+                
+                <!-- Delivery Information -->
+                <div class="payment-step">
+                    <div class="step-number">2</div>
+                    <h3 style="color: #d2691e;">Delivery Details</h3>
+                    
+                    <div class="delivery-form">
+                        <div class="form-group">
+                            <label for="delivery_address">Delivery Address *</label>
+                            <textarea name="delivery_address" id="delivery_address" rows="3" required 
+                                placeholder="Enter your complete delivery address with landmark"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="delivery_phone">Phone Number *</label>
+                            <input type="tel" name="delivery_phone" id="delivery_phone" required 
+                                placeholder="Enter your phone number">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="delivery_notes">Special Instructions (Optional)</label>
+                            <textarea name="delivery_notes" id="delivery_notes" rows="2" 
+                                placeholder="Any special delivery instructions"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Upload Payment Screenshot -->
+                <div class="payment-step">
+                    <div class="step-number">3</div>
+                    <h3 style="color: #d2691e;">Upload Payment Screenshot</h3>
+                    
+                    <div class="upload-section">
+                        <div class="form-group">
+                            <label for="payment_screenshot">Payment Screenshot *</label>
+                            <input type="file" name="payment_screenshot" id="payment_screenshot" 
+                                accept="image/*" required onchange="previewImage(this)">
+                            <small>Upload a clear screenshot of your UPI payment confirmation</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="upi_transaction_id">UPI Transaction ID (Optional)</label>
+                            <input type="text" name="upi_transaction_id" id="upi_transaction_id" 
+                                placeholder="Enter UPI transaction ID from payment app">
+                        </div>
+                        
+                        <div id="imagePreview" style="display: none; margin-top: 15px;">
+                            <img id="preview" style="max-width: 300px; max-height: 200px; border-radius: 10px;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Place Order -->
+                <div class="payment-step">
+                    <div class="step-number">4</div>
+                    <h3 style="color: #d2691e;">Confirm Your Order</h3>
+                    
+                    <button type="submit" class="place-order-btn" id="placeOrderBtn">
+                        <i class="ri-shopping-bag-line"></i> Place Order
+                    </button>
+                    
+                    <p style="font-size: 12px; color: #666; margin-top: 15px;">
+                        <i class="ri-shield-check-line"></i> 
+                        Your order will be processed after payment verification (within 24 hours)
+                    </p>
+                </div>
+            </form>
+            </div>
+
+            
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Configuration - UPDATE THESE WITH YOUR DETAILS
+    const UPI_CONFIG = {
+        upiId: 'mrajaypatel@slc',  // Replace with your actual UPI ID
+        merchantName: 'The Bake Story',
+        merchantCode: 'TBS001',
+        currency: 'INR'
+    };
+
+    // Generate UPI QR Code
+    function generateUPIQRCode(amount) {
+        let finalAmount = parseFloat(amount).toFixed(2);
+        
+        // UPI URL format
+        const upiUrl = `upi://pay?pa=${UPI_CONFIG.upiId}&pn=${encodeURIComponent(UPI_CONFIG.merchantName)}&am=${finalAmount}&cu=${UPI_CONFIG.currency}&mc=${UPI_CONFIG.merchantCode}`;
+        
+        console.log('Generated UPI URL:', upiUrl);
+        
+        // Using QR Code API service
+        const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiUrl)}`;
+        
+        const qrImage = document.getElementById('dynamic-qr');
+        const placeholder = document.getElementById('qr-placeholder-fallback');
+        
+        qrImage.src = qrApiUrl;
+        qrImage.style.display = 'block';
+        placeholder.style.display = 'none';
+        
+        // Update UPI ID display
+        document.getElementById('upi-id').textContent = UPI_CONFIG.upiId;
+    }
+
+    // Preview uploaded image
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById('preview');
+                const previewContainer = document.getElementById('imagePreview');
+                preview.src = e.target.result;
+                previewContainer.style.display = 'block';
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // Load order summary and prepare cart data
+    function loadOrderSummary() {
+        const cartData = JSON.parse(localStorage.getItem('bakeryCart')) || {};
+        console.log('Cart data:', cartData);
+        
+        // Set cart data in hidden input
+        document.getElementById('cart_data').value = JSON.stringify(cartData);
+        
+        const orderItemsList = document.getElementById('orderItemsList');
+        let totalAmount = 0;
+        let deliveryFee = 50; // ₹50 delivery fee
+        
+        if (orderItemsList) {
+            orderItemsList.innerHTML = '';
+            
+            for (const [itemId, item] of Object.entries(cartData)) {
+                if (item && item.quantity > 0) {
+                    const itemTotal = parseFloat(item.price) * parseInt(item.quantity);
+                    totalAmount += itemTotal;
+                    
+                    const orderItem = document.createElement('div');
+                    orderItem.className = 'summary-row';
+                    orderItem.innerHTML = `
+                        <span>${item.name} x ${item.quantity}</span>
+                        <span>₹${itemTotal.toFixed(2)}</span>
+                    `;
+                    orderItemsList.appendChild(orderItem);
+                }
+            }
+            
+            // Add delivery fee row
+            const deliveryRow = document.createElement('div');
+            deliveryRow.className = 'summary-row';
+            deliveryRow.innerHTML = `
+                <span>Delivery Fee</span>
+                <span>₹${deliveryFee.toFixed(2)}</span>
+            `;
+            orderItemsList.appendChild(deliveryRow);
+            
+            // Add total row
+            const totalRow = document.createElement('div');
+            totalRow.className = 'summary-row summary-total';
+            const grandTotal = totalAmount + deliveryFee;
+            totalRow.innerHTML = `
+                <span>Grand Total</span>
+                <span>₹${grandTotal.toFixed(2)}</span>
+            `;
+            orderItemsList.appendChild(totalRow);
+            
+            // Update payment amount
+            document.getElementById('paymentAmount').textContent = `₹${grandTotal.toFixed(2)}`;
+            
+            // Generate QR code
+            generateUPIQRCode(grandTotal);
+        }
+    }
+
+    // Form submission handler
+    document.getElementById('paymentForm').addEventListener('submit', function(e) {
+        const cartData = JSON.parse(localStorage.getItem('bakeryCart')) || {};
+        
+        if (Object.keys(cartData).length === 0) {
+            e.preventDefault();
+            alert('Your cart is empty. Please add items to cart first.');
+            window.location.href = "{% url 'menu' %}";
+            return;
+        }
+        
+        // Show loading state
+        const submitBtn = document.getElementById('placeOrderBtn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="ri-loader-line"></i> Processing...';
+    });
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check if order was placed successfully
+        {% if order_placed %}
+            localStorage.removeItem('bakeryCart');
+            alert('{{ message }}');
+            setTimeout(function() {
+                window.location.href = "{% url 'orders' %}";
+            }, 2000);
+            return;
+        {% endif %}
+        
+        loadOrderSummary();
+        
+        // Check if cart is empty
+        const cartData = JSON.parse(localStorage.getItem('bakeryCart')) || {};
+        if (Object.keys(cartData).length === 0) {
+            alert('Your cart is empty. Redirecting to menu...');
+            window.location.href = "{% url 'menu' %}";
+        }
+    });
+</script>
+{% endblock %}
