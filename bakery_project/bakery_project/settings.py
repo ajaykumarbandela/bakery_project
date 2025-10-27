@@ -1,8 +1,13 @@
 from pathlib import Path
 import os
-import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Import dj_database_url only if needed
+try:
+    import dj_database_url
+except ImportError:
+    dj_database_url = None
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-your-secret-key-here-change-in-production')
@@ -67,7 +72,7 @@ WSGI_APPLICATION = 'bakery_project.wsgi.application'
 # Database configuration
 # Use PostgreSQL in production (via DATABASE_URL), SQLite locally
 DATABASE_URL = os.environ.get('DATABASE_URL')
-if DATABASE_URL:
+if DATABASE_URL and dj_database_url:
     DATABASES = {
         'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
     }
